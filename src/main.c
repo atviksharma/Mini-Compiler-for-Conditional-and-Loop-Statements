@@ -1,8 +1,32 @@
 #include <stdio.h>
+#include <stdlib.h>
 
-int main() {
-    printf("Mini Compiler - Team 10\n");
-    printf("Review 1 Implementation\n");
+#include "parser.h"
+
+int main(void) {
+
+    const char *source =
+        "int a, b, x;"
+        "a = 5;"
+        "b = 10;"
+        "x = a + b * 2;";
+
+    printf("========================================\n");
+    printf("   TEAM 10 - MINI COMPILER\n");
+    printf("   BCSE307L - COMPILER DESIGN\n");
+    printf("========================================\n\n");
+
+    printf("Input Program:\n");
+    printf("%s\n\n", source);
+
+    printf("Starting compilation...\n");
+
+    parser_init(source);
+    parse_program();
+
+    printf("Compilation successful.\n");
+
+    print_tac();
 
     return 0;
 }
