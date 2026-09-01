@@ -5,7 +5,7 @@
 
 int main(void) {
 
-   const char *source =
+    const char *source =
     "int a, b, x;"
     "a = 5;"
     "b = 10;"
