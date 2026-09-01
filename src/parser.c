@@ -95,6 +95,51 @@ static int emit(const char *op,
     return code_count++;
 }
 
+/* ---------- Backpatching ---------- */
+
+static void add_to_list(int list[],
+                        int *count,
+                        int index) {
+
+    if (*count >= MAX_LIST) {
+        error("Backpatch list full");
+    }
+
+    list[*count] = index;
+    (*count)++;
+}
+
+static void merge_lists(int destination[],
+                        int *destination_count,
+                        int source[],
+                        int source_count) {
+
+    for (int i = 0; i < source_count; i++) {
+
+        add_to_list(destination,
+                    destination_count,
+                    source[i]);
+    }
+}
+
+static void backpatch(int list[],
+                      int count,
+                      int target) {
+
+    char target_string[32];
+
+    snprintf(target_string,
+             sizeof(target_string),
+             "%d",
+             target);
+
+    for (int i = 0; i < count; i++) {
+
+        strcpy(code[list[i]].result,
+               target_string);
+    }
+}
+
 /* ---------- Expressions ---------- */
 
 static ExprAttr parse_expression(void);
@@ -109,17 +154,21 @@ static ExprAttr parse_factor(void) {
             error("Undeclared variable");
         }
 
-        strcpy(result.place, current_token.lexeme);
+        strcpy(result.place,
+               current_token.lexeme);
 
         advance();
+
         return result;
     }
 
     if (current_token.type == TOKEN_NUMBER) {
 
-        strcpy(result.place, current_token.lexeme);
+        strcpy(result.place,
+               current_token.lexeme);
 
         advance();
+
         return result;
     }
 
@@ -155,11 +204,14 @@ static ExprAttr parse_term(void) {
         char *temp = new_temp();
 
         if (operator == TOKEN_MUL) {
+
             emit("*",
                  left.place,
                  right.place,
                  temp);
+
         } else {
+
             emit("/",
                  left.place,
                  right.place,
@@ -188,11 +240,14 @@ static ExprAttr parse_expression(void) {
         char *temp = new_temp();
 
         if (operator == TOKEN_PLUS) {
+
             emit("+",
                  left.place,
                  right.place,
                  temp);
+
         } else {
+
             emit("-",
                  left.place,
                  right.place,
@@ -205,22 +260,229 @@ static ExprAttr parse_expression(void) {
     return left;
 }
 
+/* ---------- Boolean Expressions ---------- */
+
+static BoolAttr parse_boolean_expression(void);
+
+static BoolAttr parse_relational(void) {
+
+    BoolAttr result;
+
+    result.true_count = 0;
+    result.false_count = 0;
+
+    ExprAttr left = parse_expression();
+
+    TokenType operator = current_token.type;
+
+    if (operator != TOKEN_LT &&
+        operator != TOKEN_GT &&
+        operator != TOKEN_LE &&
+        operator != TOKEN_GE &&
+        operator != TOKEN_EQ &&
+        operator != TOKEN_NE) {
+
+        error("Expected relational operator");
+    }
+
+    advance();
+
+    ExprAttr right = parse_expression();
+
+    int true_index;
+    int false_index;
+
+    switch (operator) {
+
+        case TOKEN_LT:
+
+            true_index = emit("if<",
+                              left.place,
+                              right.place,
+                              "");
+            break;
+
+        case TOKEN_GT:
+
+            true_index = emit("if>",
+                              left.place,
+                              right.place,
+                              "");
+            break;
+
+        case TOKEN_LE:
+
+            true_index = emit("if<=",
+                              left.place,
+                              right.place,
+                              "");
+            break;
+
+        case TOKEN_GE:
+
+            true_index = emit("if>=",
+                              left.place,
+                              right.place,
+                              "");
+            break;
+
+        case TOKEN_EQ:
+
+            true_index = emit("if==",
+                              left.place,
+                              right.place,
+                              "");
+            break;
+
+        case TOKEN_NE:
+
+            true_index = emit("if!=",
+                              left.place,
+                              right.place,
+                              "");
+            break;
+
+        default:
+
+            error("Invalid relational operator");
+    }
+
+    false_index = emit("goto",
+                        "",
+                        "",
+                        "");
+
+    add_to_list(result.truelist,
+                &result.true_count,
+                true_index);
+
+    add_to_list(result.falselist,
+                &result.false_count,
+                false_index);
+
+    return result;
+}
+
+static BoolAttr parse_boolean_and(void) {
+
+    BoolAttr left = parse_relational();
+
+    while (current_token.type == TOKEN_AND) {
+
+        advance();
+
+        int marker = code_count;
+
+        BoolAttr right = parse_relational();
+
+        backpatch(left.truelist,
+                  left.true_count,
+                  marker);
+
+        BoolAttr result;
+
+        result.true_count = 0;
+        result.false_count = 0;
+
+        merge_lists(result.truelist,
+                    &result.true_count,
+                    right.truelist,
+                    right.true_count);
+
+        merge_lists(result.falselist,
+                    &result.false_count,
+                    left.falselist,
+                    left.false_count);
+
+        merge_lists(result.falselist,
+                    &result.false_count,
+                    right.falselist,
+                    right.false_count);
+
+        left = result;
+    }
+
+    return left;
+}
+
+static BoolAttr parse_boolean_expression(void) {
+
+    BoolAttr left = parse_boolean_and();
+
+    while (current_token.type == TOKEN_OR) {
+
+        advance();
+
+        int marker = code_count;
+
+        BoolAttr right = parse_boolean_and();
+
+        backpatch(left.falselist,
+                  left.false_count,
+                  marker);
+
+        BoolAttr result;
+
+        result.true_count = 0;
+        result.false_count = 0;
+
+        merge_lists(result.truelist,
+                    &result.true_count,
+                    left.truelist,
+                    left.true_count);
+
+        merge_lists(result.truelist,
+                    &result.true_count,
+                    right.truelist,
+                    right.true_count);
+
+        merge_lists(result.falselist,
+                    &result.false_count,
+                    right.falselist,
+                    right.false_count);
+
+        left = result;
+    }
+
+    return left;
+}
+
+/* ---------- Statements ---------- */
+
+static void parse_statement(void);
+
+static void parse_block(void) {
+
+    expect(TOKEN_LBRACE);
+
+    while (current_token.type != TOKEN_RBRACE &&
+           current_token.type != TOKEN_EOF) {
+
+        parse_statement();
+    }
+
+    expect(TOKEN_RBRACE);
+}
+
 /* ---------- Assignment ---------- */
 
 static void parse_assignment(void) {
 
     char variable[64];
 
-    strcpy(variable, current_token.lexeme);
+    strcpy(variable,
+           current_token.lexeme);
 
     if (!is_declared(variable)) {
         error("Undeclared variable");
     }
 
     expect(TOKEN_ID);
+
     expect(TOKEN_ASSIGN);
 
-    ExprAttr expression = parse_expression();
+    ExprAttr expression =
+        parse_expression();
 
     emit("=",
          expression.place,
@@ -256,6 +518,137 @@ static void parse_declaration(void) {
     expect(TOKEN_SEMICOLON);
 }
 
+/* ---------- IF Statement ---------- */
+
+static void parse_if(void) {
+
+    expect(TOKEN_IF);
+
+    expect(TOKEN_LPAREN);
+
+    BoolAttr condition =
+        parse_boolean_expression();
+
+    expect(TOKEN_RPAREN);
+
+    int then_start = code_count;
+
+    backpatch(condition.truelist,
+              condition.true_count,
+              then_start);
+
+    parse_statement();
+
+    if (current_token.type == TOKEN_ELSE) {
+
+        int jump_to_end =
+            emit("goto",
+                 "",
+                 "",
+                 "");
+
+        int else_start = code_count;
+
+        backpatch(condition.falselist,
+                  condition.false_count,
+                  else_start);
+
+        advance();
+
+        parse_statement();
+
+        int end = code_count;
+
+        int end_list[1];
+
+        end_list[0] = jump_to_end;
+
+        backpatch(end_list,
+                  1,
+                  end);
+
+    } else {
+
+        int end = code_count;
+
+        backpatch(condition.falselist,
+                  condition.false_count,
+                  end);
+    }
+}
+
+/* ---------- WHILE Statement ---------- */
+
+static void parse_while(void) {
+
+    expect(TOKEN_WHILE);
+
+    int condition_start = code_count;
+
+    expect(TOKEN_LPAREN);
+
+    BoolAttr condition =
+        parse_boolean_expression();
+
+    expect(TOKEN_RPAREN);
+
+    int body_start = code_count;
+
+    backpatch(condition.truelist,
+              condition.true_count,
+              body_start);
+
+    parse_statement();
+
+    char target[32];
+
+    snprintf(target,
+             sizeof(target),
+             "%d",
+             condition_start);
+
+    emit("goto",
+         "",
+         "",
+         target);
+
+    int end = code_count;
+
+    backpatch(condition.falselist,
+              condition.false_count,
+              end);
+}
+
+/* ---------- Statement Dispatcher ---------- */
+
+static void parse_statement(void) {
+
+    if (current_token.type == TOKEN_INT) {
+
+        parse_declaration();
+
+    } else if (current_token.type == TOKEN_ID) {
+
+        parse_assignment();
+
+    } else if (current_token.type == TOKEN_IF) {
+
+        parse_if();
+
+    } else if (current_token.type == TOKEN_WHILE) {
+
+        parse_while();
+
+    } else if (current_token.type == TOKEN_LBRACE) {
+
+        parse_block();
+
+    } else {
+
+        error("Unexpected statement");
+    }
+}
+
 /* ---------- Program ---------- */
 
 void parser_init(const char *source) {
@@ -273,18 +666,7 @@ void parse_program(void) {
 
     while (current_token.type != TOKEN_EOF) {
 
-        if (current_token.type == TOKEN_INT) {
-
-            parse_declaration();
-
-        } else if (current_token.type == TOKEN_ID) {
-
-            parse_assignment();
-
-        } else {
-
-            error("Unexpected statement");
-        }
+        parse_statement();
     }
 }
 
@@ -302,6 +684,21 @@ void print_tac(void) {
                    i,
                    code[i].result,
                    code[i].arg1);
+
+        } else if (strcmp(code[i].op, "goto") == 0) {
+
+            printf("%d: goto %s\n",
+                   i,
+                   code[i].result);
+
+        } else if (strncmp(code[i].op, "if", 2) == 0) {
+
+            printf("%d: %s %s, %s goto %s\n",
+                   i,
+                   code[i].op,
+                   code[i].arg1,
+                   code[i].arg2,
+                   code[i].result);
 
         } else {
 
