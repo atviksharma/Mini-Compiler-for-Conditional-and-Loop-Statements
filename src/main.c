@@ -5,17 +5,14 @@
 
 int main(void) {
 
-    const char *source =
+   const char *source =
     "int a, b, x;"
-    "a = 0;"
-    "b = 5;"
-    "while (a < b) {"
-    "if (a == 2) {"
+    "a = 5;"
+    "b = 10;"
+    "if (a < b && b > 0) {"
     "x = a + b;"
     "} else {"
-    "x = a + 1;"
-    "}"
-    "a = a + 1;"
+    "x = a - b;"
     "}";
 
     printf("========================================\n");
