@@ -1,38 +1,36 @@
 # Mini Compiler for Conditional and Loop Statements
 
-## Team 10
-**Course:** BCSE307L - Compiler Design
+**Team 10**  
+**BCSE307L - Compiler Design**
 
-## Project Description
+## Team Members
 
-This project implements a syntax-directed mini compiler in C for conditional and loop statements.
+| Member | Name | Responsibility |
+|---|---|---|
+| Member 1 | Palak Agarwal | Lexical Analysis |
+| Member 2 | Shiksha Ajay Singh | Parser / Grammar |
+| Member 3 | Patil Soham | Semantic Attributes |
+| Member 4 | Harshvardhan Vashishtha | Backpatching + TAC |
+| Member 5 | Atvik | Testing + Documentation |
 
-The compiler performs lexical analysis, syntax analysis, semantic processing, backpatching, and Three Address Code (TAC) generation.
+## Project Overview
 
-## Objectives
+This project implements a mini compiler for a C-like language supporting variable declarations, assignments, conditional statements, and loop statements.
 
-- Perform lexical analysis of the input program.
-- Parse declarations, assignments, expressions, conditional statements, and loops.
-- Maintain a symbol table for declared variables.
-- Use semantic attributes during syntax-directed translation.
-- Generate Three Address Code (TAC).
-- Implement backpatching for conditional and loop statements.
-- Detect syntax and semantic errors.
+The compiler performs lexical analysis, parsing, semantic checking, control-flow handling, and Three Address Code generation.
 
-## Features
+## Supported Constructs
 
-- Lexical analyzer
-- Recursive descent parser
-- Symbol table
+- Variable declarations
+- Assignment statements
 - Arithmetic expressions
 - Relational expressions
-- Logical operators `&&` and `||`
+- `if` statements
 - `if-else` statements
 - `while` loops
-- Semantic attributes
-- Backpatching
-- Three Address Code generation
+- Nested conditional and loop statements
 - Undeclared variable detection
+- Three Address Code generation
 
 ## Project Structure
 
@@ -47,9 +45,15 @@ Mini-Compiler-for-Conditional-and-Loop-Statements/
 │   └── main.c
 │
 ├── tests/
+│   ├── test_assignment.c
+│   ├── test_if_else.c
+│   ├── test_while.c
+│   ├── test_nested.c
+│   ├── test_error.c
 │   └── test_cases.txt
 │
 ├── docs/
 │   └── review1.md
 │
-└── README.md
+├── README.md
+└── mini_compiler
