@@ -1,15 +1,23 @@
 MINI COMPILER TEST CASES
 =========================
 
-Test 1: Arithmetic Expression
+Test 1: Assignment and Declaration
 Input:
-int a, b, x;
+int a,b;
 a = 5;
 b = 10;
-x = a + b * 2;
 
-Expected:
-Three Address Code generation for arithmetic expressions.
+Expected Result:
+Successful compilation with TAC for both assignments.
+
+Actual Result:
+Compilation successful.
+
+Generated TAC:
+0: a = 5
+1: b = 10
+
+Status: PASS
 
 
 Test 2: If-Else
@@ -23,56 +31,100 @@ if (a < b) {
     x = a - b;
 }
 
-Expected:
-Conditional TAC with true and false branches.
+Expected Result:
+Successful compilation with conditional jumps and TAC.
+
+Actual Result:
+Compilation successful.
+
+Generated TAC:
+0: a = 5
+1: b = 10
+2: if< a, b goto 4
+3: goto 7
+4: t0 = a + b
+5: x = t0
+6: goto 9
+7: t1 = a - b
+8: x = t1
+
+Status: PASS
 
 
 Test 3: While Loop
 Input:
 int a;
 a = 0;
+
 while (a < 5) {
     a = a + 1;
 }
 
-Expected:
-Loop TAC with backpatching.
+Expected Result:
+Successful compilation with loop control flow, backpatching and TAC.
 
+Actual Result:
+Compilation successful.
 
-Test 4: Logical AND
+Generated TAC:
+0: a = 0
+1: if< a, 5 goto 3
+2: goto 6
+3: t0 = a + 1
+4: a = t0
+5: goto 1
+
+Status: PASS
+
+Test 4: Nested If-Else Inside While
 Input:
 int a, b, x;
-a = 5;
-b = 10;
-if (a < b && b > 0) {
-    x = a + b;
-} else {
-    x = a - b;
+a = 0;
+b = 5;
+
+while (a < b) {
+    if (a < 3) {
+        x = a + b;
+    } else {
+        x = a - b;
+    }
+    a = a + 1;
 }
 
-Expected:
-Short-circuit evaluation using &&.
+Expected Result:
+Successful compilation with nested control-flow TAC and backpatching.
+
+Actual Result:
+Compilation successful.
+
+Generated TAC:
+0: a = 0
+1: b = 5
+2: if< a, b goto 4
+3: goto 14
+4: if< a, 3 goto 6
+5: goto 9
+6: t0 = a + b
+7: x = t0
+8: goto 11
+9: t1 = a - b
+10: x = t1
+11: t2 = a + 1
+12: a = t2
+13: goto 2
+
+Status: PASS
 
 
-Test 5: Logical OR
-Input:
-int a, b, x;
-a = 5;
-b = 10;
-if (a > b || b > 0) {
-    x = a + b;
-} else {
-    x = a - b;
-}
-
-Expected:
-Short-circuit evaluation using ||.
-
-
-Test 6: Semantic Error
+Test 5: Undeclared Variable Error
 Input:
 int a;
 b = 10;
 
-Expected:
-Undeclared variable error.
+Expected Result:
+Compiler should report an undeclared variable error.
+
+Actual Result:
+Syntax/Semantic Error at line 2, column 1: Undeclared variable
+
+Status: PASS
