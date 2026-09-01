@@ -1,38 +1,75 @@
 # Review 1 Documentation
 
-## Project Title
-Mini Compiler for Conditional and Loop Statements
+## Mini Compiler for Conditional and Loop Statements
 
-## Course
-BCSE307L - Compiler Design
+**Course:** BCSE307L - Compiler Design  
+**Team:** 10
 
-## Team
-Team 10
+---
 
-## Project Description
-Design and implementation of a syntax-directed mini compiler in C for conditional and loop statements using lexical analysis, parsing, semantic attributes, backpatching, and Three Address Code (TAC) generation.
+## 1. Team Members and Responsibilities
 
-## Project Modules
+| Member | Name | Responsibility |
+|---|---|---|
+| Member 1 | Palak Agarwal | Lexical Analysis |
+| Member 2 | Shiksha Ajay Singh | Parser / Grammar |
+| Member 3 | Patil Soham | Semantic Attributes |
+| Member 4 | Harshvardhan Vashishtha | Backpatching + Three Address Code |
+| Member 5 | Atvik | Testing + Documentation |
 
-### 1. Lexical Analysis
-Identifies tokens such as keywords, identifiers, numbers, operators, relational operators, and delimiters.
+---
 
-### 2. Parser / Grammar
-Checks whether the input program follows the defined grammar and processes declarations, assignments, expressions, conditional statements, and loops.
+## 2. Project Objective
 
-### 3. Semantic Attributes
-Uses attributes such as expression places, true lists, and false lists during translation.
+The objective of this project is to develop a mini compiler that accepts a small C-like source program and performs compilation of declarations, assignments, conditional statements, and loop statements.
 
-### 4. Backpatching and TAC
-Generates intermediate Three Address Code and resolves incomplete jump targets using backpatching.
+The compiler reports syntax or semantic errors and generates Three Address Code (TAC) for successfully compiled programs.
 
-### 5. Testing and Documentation
-Tests arithmetic expressions, conditional statements, loops, logical operators, and semantic errors.
+---
 
-## Team Contributions
+## 3. Compiler Components
 
-- Member 1: PALAK AGARWAL - Lexical analysis
-- Member 2: SHIKSHA AJAY SINGH - Parser / grammar
-- Member 3: patil soham - Semantic attributes
-- Member 4: HARSHVARDHAN VASHISHTHA - Backpatching + TAC
-- Member 5: atvik - Testing + documentation
+The project is organized into the following components:
+
+### 3.1 Lexical Analysis
+
+The lexical analyzer identifies tokens from the input source program, including:
+
+- Keywords
+- Identifiers
+- Integer constants
+- Operators
+- Relational operators
+- Delimiters
+
+The lexical analysis functionality is implemented in:
+
+- `src/lexer.c`
+- `src/lexer.h`
+
+### 3.2 Parser / Grammar
+
+The parser processes the tokens according to the grammar supported by the mini compiler.
+
+It handles constructs such as:
+
+- Variable declarations
+- Assignments
+- `if-else` statements
+- `while` loops
+- Nested control-flow statements
+
+The parser functionality is implemented in:
+
+- `src/parser.c`
+- `src/parser.h`
+
+### 3.3 Semantic Analysis
+
+Semantic checking is performed during parsing.
+
+The compiler checks whether variables used in statements have been declared. For example:
+
+```c
+int a;
+b = 10;
