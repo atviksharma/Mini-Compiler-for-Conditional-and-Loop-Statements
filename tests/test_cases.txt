@@ -1,0 +1,78 @@
+MINI COMPILER TEST CASES
+=========================
+
+Test 1: Arithmetic Expression
+Input:
+int a, b, x;
+a = 5;
+b = 10;
+x = a + b * 2;
+
+Expected:
+Three Address Code generation for arithmetic expressions.
+
+
+Test 2: If-Else
+Input:
+int a, b, x;
+a = 5;
+b = 10;
+if (a < b) {
+    x = a + b;
+} else {
+    x = a - b;
+}
+
+Expected:
+Conditional TAC with true and false branches.
+
+
+Test 3: While Loop
+Input:
+int a;
+a = 0;
+while (a < 5) {
+    a = a + 1;
+}
+
+Expected:
+Loop TAC with backpatching.
+
+
+Test 4: Logical AND
+Input:
+int a, b, x;
+a = 5;
+b = 10;
+if (a < b && b > 0) {
+    x = a + b;
+} else {
+    x = a - b;
+}
+
+Expected:
+Short-circuit evaluation using &&.
+
+
+Test 5: Logical OR
+Input:
+int a, b, x;
+a = 5;
+b = 10;
+if (a > b || b > 0) {
+    x = a + b;
+} else {
+    x = a - b;
+}
+
+Expected:
+Short-circuit evaluation using ||.
+
+
+Test 6: Semantic Error
+Input:
+int a;
+b = 10;
+
+Expected:
+Undeclared variable error.
