@@ -11,7 +11,7 @@
 | Member 2 | Shiksha Ajay Singh | Parser / Grammar |
 | Member 3 | Patil Soham | Semantic Attributes |
 | Member 4 | Harshvardhan Vashishtha | Backpatching + TAC |
-| Member 5 | Atvik | Testing + Documentation |
+| Member 5 | Atvik Sharma| Testing + Documentation |
 
 ## Project Overview
 
