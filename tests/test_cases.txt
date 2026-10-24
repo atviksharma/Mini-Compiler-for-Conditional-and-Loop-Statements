@@ -76,6 +76,7 @@ Generated TAC:
 
 Status: PASS
 
+
 Test 4: Nested If-Else Inside While
 Input:
 int a, b, x;
@@ -126,5 +127,102 @@ Compiler should report an undeclared variable error.
 
 Actual Result:
 Syntax/Semantic Error at line 2, column 1: Undeclared variable
+
+Status: PASS
+
+
+Test 6: Boolean AND and Short-Circuit Evaluation
+Input:
+int a, b, x;
+a = 5;
+b = 10;
+
+if (a < b && b > 5) {
+    x = 1;
+} else {
+    x = 0;
+}
+
+Expected Result:
+Successful compilation with && short-circuit evaluation, conditional jumps and backpatching.
+
+Actual Result:
+Compilation successful.
+
+Generated TAC:
+0: a = 5
+1: b = 10
+2: if< a, b goto 4
+3: goto 8
+4: if> b, 5 goto 6
+5: goto 8
+6: x = 1
+7: goto 9
+8: x = 0
+
+Status: PASS
+
+
+Test 7: Boolean OR and Short-Circuit Evaluation
+Input:
+int a, b, x;
+a = 5;
+b = 10;
+
+if (a > b || b > 5) {
+    x = 1;
+} else {
+    x = 0;
+}
+
+Expected Result:
+Successful compilation with || short-circuit evaluation, conditional jumps and backpatching.
+
+Actual Result:
+Compilation successful.
+
+Generated TAC:
+0: a = 5
+1: b = 10
+2: if> a, b goto 6
+3: goto 4
+4: if> b, 5 goto 6
+5: goto 8
+6: x = 1
+7: goto 9
+8: x = 0
+
+Status: PASS
+
+
+Test 8: Syntax Error - Missing Semicolon
+Input:
+int a;
+a = 10
+
+if (a < 20) {
+    a = a + 1;
+}
+
+Expected Result:
+Compiler should report a syntax error with line and column information.
+
+Actual Result:
+Syntax/Semantic Error at line 4, column 1: Unexpected token
+
+Status: PASS
+
+
+Test 9: Invalid Token Error
+Input:
+int a;
+a = 10;
+a = 10 @ 5;
+
+Expected Result:
+Compiler should reject the invalid token and report its location.
+
+Actual Result:
+Syntax/Semantic Error at line 3, column 8: Unexpected token
 
 Status: PASS
